@@ -6,7 +6,7 @@ from cloudant.query import Query
 import time
 
 
-def training_pipeline(path, model_info_db_name='models-db'):
+def training_pipeline(path, model_info_db_name='mis_modelos'):
     """
         Función para gestionar el pipeline completo de entrenamiento
         del modelo.
