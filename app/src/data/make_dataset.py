@@ -6,7 +6,7 @@ from ..features.feature_engineering import feature_engineering
 from app import cos
 
 
-def make_dataset(path, timestamp, target, cols_to_remove, model_type='RandomForest'):
+def make_dataset(path_train, path_test, timestamp, target, cols_to_remove, model_type='RandomForest'):
 
     """
         Función que permite crear el dataset usado para el entrenamiento
@@ -25,9 +25,10 @@ def make_dataset(path, timestamp, target, cols_to_remove, model_type='RandomFore
     """
 
     print('---> Getting data')
-    df = get_raw_data_from_local(path)
-    print('---> Train / test split')
-    train_df, test_df = train_test_split(df, test_size=0.2, random_state=50)
+    train_df = get_raw_data_from_local(path_train)
+    test_df = get_raw_data_from_local(path_test)
+    print('---> Train / test split: Not needed as in different files')
+    
     print('---> Transforming data')
     train_df, test_df = transform_data(train_df, test_df, timestamp, target, cols_to_remove)
    

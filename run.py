@@ -39,10 +39,11 @@ def train_model_route():
            dict.  Mensaje de salida
     """
     # Ruta para la carga de datos locales
-    df_path = os.path.join(ROOT_DIR, 'data/actividad_dos_train.csv')
+    df_path_train = os.path.join(ROOT_DIR, 'data/actividad_dos_train.csv')
+    df_path_test = os.path.join(ROOT_DIR, 'data/actividad_dos_test.csv')
 
     # Lanzar el pipeline de entranamiento de nuestro modelo
-    train_model.training_pipeline(df_path)
+    train_model.training_pipeline(df_path_train, df_path_test)
 
     # Se puede devolver lo que queramos (mensaje de éxito en el entrenamiento, métricas, etc.)
     return {'TRAINING MODEL': 'Prediccion Fraude'}

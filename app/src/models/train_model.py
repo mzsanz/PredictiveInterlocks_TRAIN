@@ -6,7 +6,7 @@ from cloudant.query import Query
 import time
 
 
-def training_pipeline(path, model_info_db_name='mis_modelos'):
+def training_pipeline(path_train, path_test, model_info_db_name='mis_modelos'):
     """
         Función para gestionar el pipeline completo de entrenamiento
         del modelo.
@@ -30,7 +30,7 @@ def training_pipeline(path, model_info_db_name='mis_modelos'):
     ts = time.time()
 
     # carga y transformación de los datos de train y test
-    train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
+    train_df, test_df = make_dataset(path_train, path_test, ts, target, cols_to_remove)
 
     # separación de variables independientes y dependiente
     y_train = train_df[target]
