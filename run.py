@@ -26,7 +26,7 @@ def root():
            dict.  Mensaje de salida
     """
     # No hacemos nada. Solo devolvemos info (customizable a voluntad)
-    return {'Proyecto':'Mod. 4 - Ciclo de vida de modelos IA'}
+    return {'Actividad 2':'Prediccion Fraude'}
 
 
 # ruta para el lanzar el pipeline de entranamiento (Método GET)
@@ -39,13 +39,13 @@ def train_model_route():
            dict.  Mensaje de salida
     """
     # Ruta para la carga de datos locales
-    df_path = os.path.join(ROOT_DIR, 'data/data.csv')
+    df_path = os.path.join(ROOT_DIR, 'data/actividad_dos_train.csv')
 
     # Lanzar el pipeline de entranamiento de nuestro modelo
     train_model.training_pipeline(df_path)
 
     # Se puede devolver lo que queramos (mensaje de éxito en el entrenamiento, métricas, etc.)
-    return {'TRAINING MODEL': 'Mod. 4 - Ciclo de vida de modelos IA'}
+    return {'TRAINING MODEL': 'Prediccion Fraude'}
 
 
 # main
