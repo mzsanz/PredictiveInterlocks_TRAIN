@@ -4,10 +4,10 @@ from app.src.models import train_model
 from app import ROOT_DIR
 import warnings
 
-# Quitar warnings innecesarios de la salida
+# Remove unneeded warnings
 warnings.filterwarnings('ignore')
 
-# inicializar la app bajo el framework Flask
+# start-up de app under the Flask framework
 app = Flask(__name__)
 
 # On IBM Cloud Cloud Foundry, get the port number from the environment variable PORT
@@ -15,40 +15,40 @@ app = Flask(__name__)
 port = int(os.getenv('PORT', 8000))
 
 
-# usando el decorador @app.route para gestionar los enrutadores (Método GET)
-# ruta ráiz "/"
+# using @app.route to manage routers (GET method)
+# root path "/"
 @app.route('/', methods=['GET'])
 def root():
     """
-        Función para gestionar la salida de la ruta raíz.
+        Function to manage the output from root path.
 
         Returns:
-           dict.  Mensaje de salida
+           dict.  Output message
     """
-    # No hacemos nada. Solo devolvemos info (customizable a voluntad)
-    return {'Actividad 2':'Prediccion Fraude'}
+    # Do nothing. Just return info
+    return {'Project':'Predictive Interlocks'}
 
 
-# ruta para el lanzar el pipeline de entranamiento (Método GET)
+# path to start de training pipeline (GET method)
 @app.route('/train-model', methods=['GET'])
 def train_model_route():
     """
-        Función de lanzamiento del pipeline de entrenamiento.
+        Function to start-up the training pipeline
 
         Returns:
-           dict.  Mensaje de salida
+           dict.  Output message
     """
-    # Ruta para la carga de datos locales
-    df_path = os.path.join(ROOT_DIR, 'data/actividad_dos_train.csv')
+    # Path to load local data
+    df_path = os.path.join(ROOT_DIR, 'data/project_dataset.csv')
 
-    # Lanzar el pipeline de entranamiento de nuestro modelo
+    # Start the training pipeline of our model
     train_model.training_pipeline(df_path)
 
-    # Se puede devolver lo que queramos (mensaje de éxito en el entrenamiento, métricas, etc.)
-    return {'TRAINING MODEL': 'Prediccion Fraude'}
+    # Return message
+    return {'TRAINING MODEL': 'Predictive Interlocks'}
 
 
 # main
 if __name__ == '__main__':
-    # ejecución de la app
+    # execution of the app
     app.run(host='0.0.0.0', port=port, debug=True)

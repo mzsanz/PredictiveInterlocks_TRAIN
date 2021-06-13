@@ -1,104 +1,105 @@
 from ..data.make_dataset import make_dataset
 from ..evaluation.evaluate_model import evaluate_model
 from app import ROOT_DIR, cos, client
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from cloudant.query import Query
 import time
 
 
-def training_pipeline(path, model_info_db_name='mis_modelos'):
+def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     """
-        Función para gestionar el pipeline completo de entrenamiento
-        del modelo.
+        Function that implements the full training pipeline of the model.
 
         Args:
-            path (str):  Ruta hacia los datos.
+            path (str):  path to data.
 
         Kwargs:
-            model_info_db_name (str):  base de datos a usar para almacenar
-            la info del modelo.
+            model_info_db_name (str):  database to use for storage of model info.
     """
 
-    # Carga de la configuración de entrenamiento
+    # Load the training configuration of the model
     model_config = load_model_config(model_info_db_name)['model_config']
-    # variable dependiente a usar
+    # dependent variable
     target = model_config['target']
-    # columnas a retirar
+    # columns to remove
     cols_to_remove = model_config['cols_to_remove']
+    # columns to add
+    cols_to_add = model_config['cols_to_add']
 
-    # timestamp usado para versionar el modelo y los objetos
+    # timestamp used for model and objects versioning
     ts = time.time()
 
-    # carga y transformación de los datos de train y test
-    train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
+    # load and transformation of the train and test dataset
+    train_df, test_df = make_dataset(path, ts, target, cols_to_remove, cols_to_add)
 
-    # separación de variables independientes y dependiente
+    # split of variables: indepenedent and dependent 
     y_train = train_df[target]
     X_train = train_df.drop(columns=[target]).copy()
     y_test = test_df[target]
     X_test = test_df.drop(columns=[target]).copy()
 
-    # definición del modelo (Random Forest)
-    model = RandomForestClassifier(n_estimators=model_config['n_estimators'],
-                                   max_features=model_config['max_features'],
+    # model definition (Decision Tree Classifier)
+    model = DecisionTreeClassifier(max_depth=model_config['max_depth'],
+                                   min_samples_leaf=model_config['min_samples_leaf'],
+                                   min_samples_split=model_config['min_samples_split'],
                                    random_state=50,
                                    n_jobs=-1)
 
     print('---> Training a model with the following configuration:')
     print(model_config)
 
-    # Ajuste del modelo con los datos de entrenamiento
+    # Fit the model with the training dataset
     model.fit(X_train, y_train)
 
-    # guardado del modelo en IBM COS
+    # Saving the model in IBM COS
     print('------> Saving the model {} object on the cloud'.format('model_'+str(int(ts))))
     save_model(model, 'model',  ts)
 
-    # Evaluación del modelo y recolección de información relevante
+    # Evaluating the model and collecting relevant info
     print('---> Evaluating the model')
     metrics_dict = evaluate_model(model, X_test, y_test, ts, model_config['model_name'])
 
-    # Guardado de la info del modelo en BBDD documental
+    # Saving model info in documental database
     print('------> Saving the model information on the cloud')
     info_saved_check = save_model_info(model_info_db_name, metrics_dict)
 
-    # Check de guardado de info del modelo
+    # Check of model info saving
     if info_saved_check:
         print('------> Model info saved SUCCESSFULLY!!')
     else:
         if info_saved_check:
             print('------> ERROR saving the model info!!')
 
-    # selección del mejor modelo para producción
+    # Selection of the best model for production
     print('---> Putting best model in production')
     put_best_model_in_production(metrics_dict, model_info_db_name)
 
 
-def save_model(obj, name, timestamp, bucket_name='models-uem'):
+def save_model(obj, name, timestamp, bucket_name='uem-models-mzs'):
     """
-        Función para guardar el modelo en IBM COS
+        Function to store the model in IBM COS
 
         Args:
-            obj (sklearn-object): Objeto de modelo entrenado.
-            name (str):  Nombre de objeto a usar en el guardado.
-            timestamp (float):  Representación temporal en segundos.
+            obj (sklearn-object): trained model object
+            name (str):  name of the object to use in the storing process
+            timestamp (float):  time representation in seconds
 
         Kwargs:
-            bucket_name (str):  depósito de IBM COS a usar.
+            bucket_name (str):  IBM COS bucket to use.
     """
-    cos.save_object_in_cos(obj, name, timestamp)
+    cos.save_object_in_cos(obj, name, timestamp, bucket_name)
 
 
 def save_model_info(db_name, metrics_dict):
     """
-        Función para guardar la info del modelo en IBM Cloudant
+        Function to store model info in IBM Cloudant
 
         Args:
-            db_name (str):  Nombre de la base de datos.
-            metrics_dict (dict):  Info del modelo.
+            db_name (str):  Database name.
+            metrics_dict (dict):  Model info.
 
         Returns:
-            boolean. Comprobación de si el documento se ha creado.
+            boolean. Check if the document has been created.
     """
     db = client.get_database(db_name)
     client.create_document(db, metrics_dict)
