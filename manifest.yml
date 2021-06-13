@@ -1,5 +1,5 @@
 ---
 applications:
-- name: prediccion_fraude-uem-2021-train
+- name: predictive_interlocks-uem-2021-train
   random-route: true
   memory: 128M
