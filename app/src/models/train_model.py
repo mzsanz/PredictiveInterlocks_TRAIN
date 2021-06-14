@@ -30,8 +30,6 @@ def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     # load and transformation of the train and test dataset
     train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
 
-    print(train_df)
-
     # split of variables: indepenedent and dependent 
     y_train = train_df[target]
     X_train = train_df.drop(columns=[target]).copy()

@@ -185,10 +185,9 @@ def pre_train_data_prep(train_df, test_df, timestamp, target):
     train_df, test_df = input_missing_values(train_df, test_df, timestamp)
 
     # Scaling
-    #print('------> Scaling features')
-    #train_df, test_df = scale_data(train_df, test_df)
+    print('------> Scaling features')
+    train_df, test_df = scale_data(train_df, test_df)
 
-    print(train_df)
     # Join the target variable to the datasets
     train_df.reset_index(drop=True, inplace=True)
     test_df.reset_index(drop=True, inplace=True)
@@ -236,8 +235,8 @@ def scale_data(train_df, test_df):
     # objeto de escalado en el rango (0,1)
     scaler = StandardScaler()
     # scaling train dataset
-    train_df = scaler.fit_transform(train_df)
+    train_df = pd.DataFrame(scaler.fit_transform(train_df))
     # scaling test dataset
-    test_df = scaler.transform(test_df)
+    test_df = pd.DataFrame(scaler.transform(test_df))
 
     return train_df.copy(), test_df.copy()
