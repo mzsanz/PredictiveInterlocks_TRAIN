@@ -46,6 +46,7 @@ def get_raw_data_from_local(path):
     """
 
     df = pd.read_csv(path)
+
     return df.copy()
 
 
@@ -83,6 +84,13 @@ def transform_data(train_df, test_df, timestamp, target, cols_to_remove):
     print('------> Removing BM columns')
     train_df = remove_unwanted_columns(train_df, cols_to_remove)
     test_df = remove_unwanted_columns(test_df, cols_to_remove)
+
+    
+    #Set 'Index' as index name for train and test datasets
+    train_df.set_index('Unnamed: 0', inplace=True)
+    train_df.index.set_names('Index', inplace=True)
+    test_df.set_index('Unnamed: 0', inplace=True)
+    test_df.index.set_names('Index', inplace=True)
 
     # Saving the predictors (columns) and target in IBM COS
     print('---------> Saving predictors and target')
@@ -177,9 +185,10 @@ def pre_train_data_prep(train_df, test_df, timestamp, target):
     train_df, test_df = input_missing_values(train_df, test_df, timestamp)
 
     # Scaling
-    print('------> Scaling features')
-    train_df, test_df = scale_data(train_df, test_df)
+    #print('------> Scaling features')
+    #train_df, test_df = scale_data(train_df, test_df)
 
+    print(train_df)
     # Join the target variable to the datasets
     train_df.reset_index(drop=True, inplace=True)
     test_df.reset_index(drop=True, inplace=True)

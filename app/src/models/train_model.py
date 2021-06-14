@@ -30,6 +30,8 @@ def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     # load and transformation of the train and test dataset
     train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
 
+    print(train_df)
+
     # split of variables: indepenedent and dependent 
     y_train = train_df[target]
     X_train = train_df.drop(columns=[target]).copy()
@@ -40,8 +42,7 @@ def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     model = DecisionTreeClassifier(max_depth=model_config['max_depth'],
                                    min_samples_leaf=model_config['min_samples_leaf'],
                                    min_samples_split=model_config['min_samples_split'],
-                                   random_state=50,
-                                   n_jobs=-1)
+                                   random_state=50)
 
     print('---> Training a model with the following configuration:')
     print(model_config)
