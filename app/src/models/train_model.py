@@ -23,14 +23,12 @@ def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     target = model_config['target']
     # columns to remove
     cols_to_remove = model_config['cols_to_remove']
-    # columns to add
-    cols_to_add = model_config['cols_to_add']
-
+    
     # timestamp used for model and objects versioning
     ts = time.time()
 
     # load and transformation of the train and test dataset
-    train_df, test_df = make_dataset(path, ts, target, cols_to_remove, cols_to_add)
+    train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
 
     # split of variables: indepenedent and dependent 
     y_train = train_df[target]
@@ -109,61 +107,61 @@ def save_model_info(db_name, metrics_dict):
 
 def put_best_model_in_production(model_metrics, db_name):
     """
-        Función para poner el mejor modelo en producción.
+        Function to set the best model into production
 
         Args:
-            model_metrics (dict):  Info del modelo.
-            db_name (str):  Nombre de la base de datos.
+            model_metrics (dict):  model info.
+            db_name (str):  database name.
     """
 
-    # conexión a la base de datos elegida
+    # conection to the database
     db = client.get_database(db_name)
-    # consulta para traer el documento con la info del modelo en producción
+    # query for the model in production info
     query = Query(db, selector={'status': {'$eq': 'in_production'}})
     res = query()['docs']
-    #  id del modelo en producción
+    #  id of the model in production
     best_model_id = model_metrics['_id']
 
-    # en caso de que SÍ haya un modelo en producción
+    # in case there is a model in production
     if len(res) != 0:
-        # se realiza una comparación entre el modelo entrenado y el modelo en producción
+        # compare the trained model and the model in production
         best_model_id, worse_model_id = get_best_model(model_metrics, res[0])
-        # se marca el peor modelo (entre ambos) como "NO en producción"
+        # worse model of the comparison is tagged as "Not in production" 
         worse_model_doc = db[worse_model_id]
         worse_model_doc['status'] = 'none'
-        # se actualiza el marcado en la BDD
+        # tagging is updated in the database
         worse_model_doc.save()
     else:
-        # primer modelo entrenado va a automáticamente a producción
+        # first trained model goes straight into production
         print('------> FIRST model going in production')
 
-    # se marca el mejor modelo como "SÍ en producción"
+    # tag the best model as "In production"
     best_model_doc = db[best_model_id]
     best_model_doc['status'] = 'in_production'
-    # se actualiza el marcado en la BDD
+    # tagging is updated in the database
     best_model_doc.save()
 
 
 def get_best_model(model_metrics1, model_metrics2):
     """
-        Función para comparar modelos.
+        Function to compare models.
 
         Args:
-            model_metrics1 (dict):  Info del primer modelo.
-            model_metrics2 (str):  Info del segundo modelo.
+            model_metrics1 (dict):  model1 info.
+            model_metrics2 (str):  model2 info.
 
         Returns:
-            str, str. Ids del mejor y peor modelo en la comparación.
+            str, str. Ids of the best and worse model in the comparison.
     """
 
-    # comparación de modelos usando la métrica AUC score.
+    # comparison using AUC score as metric
     auc1 = model_metrics1['model_metrics']['roc_auc_score']
     auc2 = model_metrics2['model_metrics']['roc_auc_score']
     print('------> Model comparison:')
     print('---------> TRAINED model {} with AUC score: {}'.format(model_metrics1['_id'], str(round(auc1, 3))))
     print('---------> CURRENT model in PROD {} with AUC score: {}'.format(model_metrics2['_id'], str(round(auc2, 3))))
 
-    # el orden de la salida debe ser (mejor modelo, peor modelo)
+    # the output order should be (best model, worse model)
     if auc1 >= auc2:
         print('------> TRAINED model going in production')
         return model_metrics1['_id'], model_metrics2['_id']
@@ -174,13 +172,13 @@ def get_best_model(model_metrics1, model_metrics2):
 
 def load_model_config(db_name):
     """
-        Función para cargar la info del modelo desde IBM Cloudant.
+        Function to load the model info from IBM Cloudant.
 
         Args:
-            db_name (str):  Nombre de la base de datos.
+            db_name (str):  database name.
 
         Returns:
-            dict. Documento con la configuración del modelo.
+            dict. Document with the model configuration.
     """
     db = client.get_database(db_name)
     query = Query(db, selector={'_id': {'$eq': 'model_config'}})
