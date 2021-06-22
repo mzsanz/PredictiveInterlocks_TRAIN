@@ -32,19 +32,12 @@ def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     # load and transformation of the train and test dataset
     train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
 
-    print("After data transformations the shapes of train and test datasets are")
-    print(train_df.shape)
-    print(test_df.shape)
-
     # split of variables: indepenedent and dependent 
     y_train = train_df[target]
     X_train = train_df.drop(columns=[target]).copy()
     y_test = test_df[target]
     X_test = test_df.drop(columns=[target]).copy()
 
-    print ("Previously to model, the training dataset shape for X_train and y_train:")
-    print(X_train.shape)
-    print(y_train.shape)
     # model definition (Decision Tree Classifier)
     model = DecisionTreeClassifier(max_depth=model_config['max_depth'],
                                    min_samples_leaf=model_config['min_samples_leaf'],

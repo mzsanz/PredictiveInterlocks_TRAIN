@@ -23,14 +23,12 @@ def make_dataset(path, timestamp, target, cols_to_remove):
 
     print('---> Getting data')
     df = get_raw_data_from_local(path)
-    print(df.shape)
     print('---> Train / test split')
     train_df, test_df = train_test_split(df, test_size=0.1, random_state=24)
     print('---> Transforming data and making Feature Engineering')
     train_df, test_df = transform_data(train_df, test_df, timestamp, target, cols_to_remove)
     print('---> Preparing data for training')
     train_df, test_df = pre_train_data_prep(train_df, test_df, timestamp, target)
-    print(train_df.shape)
    
     return train_df.copy(), test_df.copy()
 
