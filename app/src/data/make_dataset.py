@@ -23,12 +23,14 @@ def make_dataset(path, timestamp, target, cols_to_remove):
 
     print('---> Getting data')
     df = get_raw_data_from_local(path)
+    print(df.shape)
     print('---> Train / test split')
     train_df, test_df = train_test_split(df, test_size=0.1, random_state=24)
     print('---> Transforming data and making Feature Engineering')
     train_df, test_df = transform_data(train_df, test_df, timestamp, target, cols_to_remove)
     print('---> Preparing data for training')
     train_df, test_df = pre_train_data_prep(train_df, test_df, timestamp, target)
+    print(train_df.shape)
    
     return train_df.copy(), test_df.copy()
 
@@ -186,7 +188,7 @@ def pre_train_data_prep(train_df, test_df, timestamp, target):
 
     # Scaling
     print('------> Scaling features')
-    train_df, test_df = scale_data(train_df, test_df)
+    train_df, test_df = scale_data(train_df, test_df, timestamp)
 
     # Join the target variable to the datasets
     train_df.reset_index(drop=True, inplace=True)
@@ -222,7 +224,7 @@ def input_missing_values(train_df, test_df, timestamp):
 
     return train_df.copy(), test_df.copy()
 
-def scale_data(train_df, test_df):
+def scale_data(train_df, test_df, timestamp):
     """
         Function to scale variables
         Args:
@@ -238,5 +240,9 @@ def scale_data(train_df, test_df):
     train_df = pd.DataFrame(scaler.fit_transform(train_df))
     # scaling test dataset
     test_df = pd.DataFrame(scaler.transform(test_df))
+
+    # save the scaler for future new data
+    print('------> Saving scaler on the cloud')
+    cos.save_object_in_cos(scaler, 'scaler', timestamp)
 
     return train_df.copy(), test_df.copy()

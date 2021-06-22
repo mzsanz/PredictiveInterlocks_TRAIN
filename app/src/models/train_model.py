@@ -2,6 +2,8 @@ from ..data.make_dataset import make_dataset
 from ..evaluation.evaluate_model import evaluate_model
 from app import ROOT_DIR, cos, client
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import cross_val_predict
 from cloudant.query import Query
 import time
 
@@ -30,18 +32,29 @@ def training_pipeline(path, model_info_db_name='predictive-interlocks-model'):
     # load and transformation of the train and test dataset
     train_df, test_df = make_dataset(path, ts, target, cols_to_remove)
 
+    print("After data transformations the shapes of train and test datasets are")
+    print(train_df.shape)
+    print(test_df.shape)
+
     # split of variables: indepenedent and dependent 
     y_train = train_df[target]
     X_train = train_df.drop(columns=[target]).copy()
     y_test = test_df[target]
     X_test = test_df.drop(columns=[target]).copy()
 
+    print ("Previously to model, the training dataset shape for X_train and y_train:")
+    print(X_train.shape)
+    print(y_train.shape)
     # model definition (Decision Tree Classifier)
     model = DecisionTreeClassifier(max_depth=model_config['max_depth'],
                                    min_samples_leaf=model_config['min_samples_leaf'],
                                    min_samples_split=model_config['min_samples_split'],
                                    random_state=50)
 
+    # Use StratifiedKFold to divide the trainset in 5 strats. Use random state = 1234
+    kfold = StratifiedKFold(n_splits=5, random_state=1234, shuffle=True)
+    cross_val_predict(model, X_train, y_train, cv=kfold)
+    
     print('---> Training a model with the following configuration:')
     print(model_config)
 

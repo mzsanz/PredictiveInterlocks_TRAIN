@@ -30,9 +30,10 @@ def evaluate_model(model, X_test, y_test, timestamp, model_name):
     # training timestamp (dd/mm/YY-H:M:S)
     model_info['date'] = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
     model_info['model_used'] = model_name
-    # objects used in the model (imputer)
+    # objects used in the model (imputer and scaler)
     model_info['objects'] = {}
     model_info['objects']['imputer'] = 'imputer_' + str(int(timestamp))
+    model_info['objects']['scaler'] = 'scaler_' + str(int(timestamp))
     # metrics
     model_info['model_metrics'] = {}
     model_info['model_metrics']['confusion_matrix'] = confusion_matrix(y_test, y_pred).tolist()
